@@ -1,3 +1,5 @@
+import random
+#ELITE_NUM = 5
 
 
 
@@ -44,7 +46,51 @@ def print_table(names, distance):
             print(f"{distance[p][r]}", end=",")
 
         print("")
+        
+#def test():
+    #for x in range(ELITE_NUM):
+        #solution(x) 
+
+def factorial(num):
+    if (num == 0):
+        return 1
+    else:
+        return num * factorial(num - 1)
+
+def create_cycle():
+    solution = [0 for i in range(NUM)]
+    temp_cities = [(j) for j in range(NUM)]
+    for l in range(NUM ):
+        rand_num = random.randrange(0, NUM - l)
+        solution[l] = temp_cities[rand_num]
+        temp_cities.pop(rand_num)
+
+    solution.insert(NUM, solution[0])
+    return solution
+
+
+def initial_pop():
+    global initial_num
+    initial_num = int(factorial(NUM - 1) / 5)
+    global solutions
+    solutions = [[0 for k in range(NUM + 1)] for l in range(initial_num)]
+
+    for n in range(initial_num):
+        array = create_cycle()
+        for m in range(NUM + 1):
+            solutions[n][m] = array[m]
+
+def fitness(solution):
+    lenght = 0
+    for i in range(NUM):
+        lenght = lenght + int(table[solution[i]][solution[i + 1]])
+    
+    return lenght
+  
 
 get_length("cities.csv")
 city_table("cities.csv", NUM)
 print_table(cities, table)
+initial_pop()
+solution_len = [fitness(solutions[i]) for i in range(initial_num)]
+print(solution_len)
