@@ -1,34 +1,29 @@
 import random
-#ELITE_NUM = 5
-
 
 
 #Function to get number on cities inputed
 def get_length(names):
-    global NUM
+    num = 0
     f = open(names, "r")
     temp = f.readline()
     temp = temp.replace(",", "")
-    NUM = len(temp) - 1
+    num = len(temp) - 1
     f.close()
+    return num
 
 #Function to create 2D array with distances between cities
 #And 1D array with names of the cities
-def city_table(names, num):
-    global cities
-    global table
-
-    f = open(names, "r")
+def city_table(file, names, distance, num):
+    f = open(file, "r")
     text = f.readline()
 
-    table = [[0 for j in range(num)]for i in range(num)]
-    cities = [text[i * 2] for i in range(num)]
+    for i in range(num):
+        names[i] = text[i * 2]
 
     for p in range(num):
         text = f.readline()
         for r in range(num):
-
-            table[p][r] = text[2 * r]
+            distance[p][r] = text[2 * r]
 
     f.close()
 
@@ -46,10 +41,6 @@ def print_table(names, distance):
             print(f"{distance[p][r]}", end=",")
 
         print("")
-        
-#def test():
-    #for x in range(ELITE_NUM):
-        #solution(x) 
 
 def factorial(num):
     if (num == 0):
@@ -68,29 +59,64 @@ def create_cycle():
     solution.insert(NUM, solution[0])
     return solution
 
-
-def initial_pop():
-    global initial_num
-    initial_num = int(factorial(NUM - 1) / 5)
-    global solutions
-    solutions = [[0 for k in range(NUM + 1)] for l in range(initial_num)]
-
-    for n in range(initial_num):
+def initial_pop(cycles, num):
+    for n in range(num):
         array = create_cycle()
         for m in range(NUM + 1):
-            solutions[n][m] = array[m]
+            cycles[n][m] = array[m]
 
-def fitness(solution):
+def fitness(cycle):
     lenght = 0
     for i in range(NUM):
-        lenght = lenght + int(table[solution[i]][solution[i + 1]])
+        lenght = lenght + int(table[cycle[i]][cycle[i + 1]])
     
     return lenght
-  
 
-get_length("cities.csv")
-city_table("cities.csv", NUM)
+def solution_sort(cycles, len_array):
+    for i in range(initial_num - 2):
+        for j in range(initial_num - 1):
+            if (len_array[j] > len_array[j + 1]):
+                temp = len_array[j]
+                len_array[j] = len_array[j + 1]
+                len_array[j + 1] = temp
+
+                temp = cycles[j]
+                cycles[j] = cycles[j + 1]
+                cycles[j + 1] = temp
+            else:
+                continue
+
+def mutation(cycle):
+    num1 = random.randrange(0, NUM)
+    num2 = random.randrange(0, NUM)
+    while (num1 == num2):
+        num2 = random.randrange(0, NUM)
+    
+    temp = cycle[num1]
+    cycle[num1] = cycle[num2]
+    cycle[num2] = temp
+
+
+#main program
+
+NUM = get_length("cities.csv")
+
+table = [[0 for j in range(NUM)]for i in range(NUM)]
+cities = [0 for k in range(NUM)]
+
+city_table("cities.csv", cities, table, NUM)
+
+
 print_table(cities, table)
-initial_pop()
-solution_len = [fitness(solutions[i]) for i in range(initial_num)]
-print(solution_len)
+
+
+initial_num = int(factorial(NUM - 1) / 5)
+solutions = [[0 for k in range(NUM + 1)] for l in range(initial_num)]
+
+initial_pop(solutions, initial_num)
+
+
+solutions_len = [fitness(solutions[i]) for i in range(initial_num)]
+
+solution_sort(solutions, solutions_len)
+

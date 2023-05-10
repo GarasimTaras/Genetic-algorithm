@@ -10,11 +10,14 @@ TO DO
             Somohow keep solutions unique
         2.2)Verifying function
         2.3)Delete duplicats
+        
     3)Mutation function
         3.1)Swap the position of two cities
     4)Selection function
             4.1)Make a new generation. Same size as initial generation
-   5)Initialization 
+
+    5)Initialization
+
     6)The main loop
     7)counter
     7.1)timer
