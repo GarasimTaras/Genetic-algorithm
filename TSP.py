@@ -101,17 +101,62 @@ def crossover(cycle1, cycle2, temp1, temp2):
     num1 = random.randrange(1, (NUM - 2))
     num2 = random.randrange((num1 + 1), (NUM - 1))
 
-    print(num1, num2)
-    while (num1 != (num2 + 1)):
-        temp1[num1] = cycle1[num1]
-        temp2[num1] = cycle2[num1]
+    node1_num, node2_num = 0, 0
+    for i in range((num2 + 1), NUM):
+        if (node_validation(cycle1[i], cycle2, num1, num2)):
+            temp1[node1_num] = cycle1[i]
+            node1_num += 1
+        else:
+            pass
         
-        num1 = num1 + 1 
+        if (node_validation(cycle2[i], cycle1, num1, num2)):
+            temp2[node2_num] = cycle2[i]
+            node2_num += 1
+        else:
+            continue
 
-    print(temp1)
-    print(temp2)
+    for j in range(num2 + 1):
+        if (node_validation(cycle1[j], cycle2, num1, num2)):
+            temp1[node1_num] = cycle1[j]
+            node1_num += 1
+        else:
+            pass
 
+        if (node_validation(cycle2[j], cycle1, num1, num2)):
+            temp2[node2_num] = cycle2[j]
+            node2_num += 1
+        else:
+            continue
 
+    for n in range(num1, (num2 + 1)):
+        temp = cycle1[n]
+        cycle1[n] = cycle2[n]
+        cycle2[n] = temp
+
+    for k in range(num1):
+        cycle1[k] = temp1[k]
+        cycle2[k] = temp2[k]
+
+    for l in range((num2 + 1), NUM):
+        k += 1
+        cycle1[l] = temp1[k]
+        cycle2[l] = temp2[k]
+
+    cycle1[NUM] = cycle1[0]
+    cycle2[NUM] = cycle2[0]
+
+def node_validation(node, swap, lower, upper):
+    checksum = -1
+    for i in range(lower, (upper + 1)):
+        if (node != swap[i]):
+            checksum += 1
+        else:
+            continue
+
+    if (checksum == (upper - lower)):
+        return True
+    else:
+        return False
 
 #main program
 
@@ -136,7 +181,7 @@ solutions_len = [fitness(solutions[i]) for i in range(initial_num)]
 
 solution_sort(solutions, solutions_len)
 
-temp1 = [0 for i in range(NUM)]
-temp2 = [0 for j in range(NUM)]
+temp1 = [-1 for i in range(NUM)]
+temp2 = [-1 for j in range(NUM)]
 
 crossover(solutions[5], solutions[25], temp1, temp2)
