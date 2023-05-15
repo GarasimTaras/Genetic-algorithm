@@ -1,5 +1,5 @@
 import random
-
+ELITE = 4
 
 #Function to get number on cities inputed
 def get_length(names):
@@ -51,7 +51,7 @@ def factorial(num):
 def create_cycle():
     solution = [0 for i in range(NUM)]
     temp_cities = [(j) for j in range(NUM)]
-    for l in range(NUM ):
+    for l in range(NUM):
         rand_num = random.randrange(0, NUM - l)
         solution[l] = temp_cities[rand_num]
         temp_cities.pop(rand_num)
@@ -91,10 +91,26 @@ def mutation(cycle):
     num2 = random.randrange(0, NUM)
     while (num1 == num2):
         num2 = random.randrange(0, NUM)
-    
+     
+    print(num1, num2) 
     temp = cycle[num1]
     cycle[num1] = cycle[num2]
     cycle[num2] = temp
+
+def crossover(cycle1, cycle2, temp1, temp2):
+    num1 = random.randrange(1, (NUM - 2))
+    num2 = random.randrange((num1 + 1), (NUM - 1))
+
+    print(num1, num2)
+    while (num1 != (num2 + 1)):
+        temp1[num1] = cycle1[num1]
+        temp2[num1] = cycle2[num1]
+        
+        num1 = num1 + 1 
+
+    print(temp1)
+    print(temp2)
+
 
 
 #main program
@@ -110,7 +126,7 @@ city_table("cities.csv", cities, table, NUM)
 print_table(cities, table)
 
 
-initial_num = int(factorial(NUM - 1) / 5)
+initial_num = int(factorial(NUM - 1))
 solutions = [[0 for k in range(NUM + 1)] for l in range(initial_num)]
 
 initial_pop(solutions, initial_num)
@@ -120,3 +136,7 @@ solutions_len = [fitness(solutions[i]) for i in range(initial_num)]
 
 solution_sort(solutions, solutions_len)
 
+temp1 = [0 for i in range(NUM)]
+temp2 = [0 for j in range(NUM)]
+
+crossover(solutions[5], solutions[25], temp1, temp2)
