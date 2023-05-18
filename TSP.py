@@ -1,4 +1,5 @@
 import random
+import sys
 ELITE = 4
 
 #Function to get number on cities inputed
@@ -15,15 +16,15 @@ def get_length(names):
 #And 1D array with names of the cities
 def city_table(file, names, distance, num):
     f = open(file, "r")
-    text = f.readline()
+    text = f.readline().strip('\n')
+    
+    for name in range(num):
+        names[name] = text.split(',')[name]
 
-    for i in range(num):
-        names[i] = text[i * 2]
-
-    for p in range(num):
-        text = f.readline()
-        for r in range(num):
-            distance[p][r] = text[2 * r]
+    for row in range(num):
+        text = f.readline().strip('\n')
+        for column in range(num):
+            distance[row][column] = text.split(',')[column]
 
     f.close()
 
@@ -87,68 +88,64 @@ def solution_sort(cycles, len_array):
                 continue
 
 def mutation(cycle):
-    num1 = random.randrange(0, NUM)
-    num2 = random.randrange(0, NUM)
+    num1 = random.randrange(1, NUM)
+    num2 = random.randrange(1, NUM)
     while (num1 == num2):
-        num2 = random.randrange(0, NUM)
-     
-    print(num1, num2) 
+        num2 = random.randrange(1, NUM)
+    
     temp = cycle[num1]
     cycle[num1] = cycle[num2]
     cycle[num2] = temp
+    
 
-def crossover(cycle1, cycle2, temp1, temp2):
+def crossover(solu1, solu2, new1, new2):
     num1 = random.randrange(1, (NUM - 2))
     num2 = random.randrange((num1 + 1), (NUM - 1))
 
-    node1_num, node2_num = 0, 0
-    for i in range((num2 + 1), NUM):
-        if (node_validation(cycle1[i], cycle2, num1, num2)):
-            temp1[node1_num] = cycle1[i]
-            node1_num += 1
-        else:
-            pass
+    for swap in range(num1, num2 + 1):
+        temp_array[new2][swap] = solutions[solu1][swap]
+        temp_array[new1][swap] = solutions[solu2][swap]
+    
+    node1_filled = 0
+    node2_filled = 0
+
+    for fill in range(num2 + 1, NUM):
+        if (node_validation(solutions[solu1][fill], temp_array[new1], num1, num2)):
+            temp_array[new1][node1_filled] = solutions[solu1][fill]
+            node1_filled += 1
+            if (node1_filled == num1):
+                node1_filled = num2 + 1
+
+        if (node_validation(solutions[solu2][fill], temp_array[new2], num1, num2)):
+            temp_array[new2][node2_filled] = solutions[solu2][fill]
+            node2_filled += 1
+            if (node2_filled == num1):
+                node2_filled = num2 + 1
         
-        if (node_validation(cycle2[i], cycle1, num1, num2)):
-            temp2[node2_num] = cycle2[i]
-            node2_num += 1
-        else:
-            continue
 
-    for j in range(num2 + 1):
-        if (node_validation(cycle1[j], cycle2, num1, num2)):
-            temp1[node1_num] = cycle1[j]
-            node1_num += 1
-        else:
-            pass
+    for fill in range(0, num2 + 1):
+        if (node_validation(solutions[solu1][fill], temp_array[new1], num1, num2)):
+            temp_array[new1][node1_filled] = solutions[solu1][fill]
+            node1_filled += 1
+            if (node1_filled == num1):
+                node1_filled = num2 + 1
 
-        if (node_validation(cycle2[j], cycle1, num1, num2)):
-            temp2[node2_num] = cycle2[j]
-            node2_num += 1
-        else:
-            continue
+        if (node_validation(solutions[solu2][fill], temp_array[new2], num1, num2)):
+            temp_array[new2][node2_filled] = solutions[solu2][fill]
+            node2_filled += 1
+            if (node2_filled == num1):
+                node2_filled = num2 + 1
+            
 
-    for n in range(num1, (num2 + 1)):
-        temp = cycle1[n]
-        cycle1[n] = cycle2[n]
-        cycle2[n] = temp
+    temp_array[new1][NUM] = temp_array[new1][0]
+    temp_array[new2][NUM] = temp_array[new2][0]
 
-    for k in range(num1):
-        cycle1[k] = temp1[k]
-        cycle2[k] = temp2[k]
 
-    for l in range((num2 + 1), NUM):
-        k += 1
-        cycle1[l] = temp1[k]
-        cycle2[l] = temp2[k]
 
-    cycle1[NUM] = cycle1[0]
-    cycle2[NUM] = cycle2[0]
-
-def node_validation(node, swap, lower, upper):
+def node_validation(node, array, lower, upper):
     checksum = -1
     for i in range(lower, (upper + 1)):
-        if (node != swap[i]):
+        if (node != array[i]):
             checksum += 1
         else:
             continue
@@ -158,30 +155,74 @@ def node_validation(node, swap, lower, upper):
     else:
         return False
 
+def tournament():
+    first = random.randrange(0, initial_num)
+    second = random.randrange(0, initial_num)
+
+    parent1 = solutions_len[first]
+    parent2 = solutions_len[second]
+
+    if (parent1 < parent2):
+        return first
+    else:
+        return second
+
 #main program
 
-NUM = get_length("cities.csv")
+
+
+
+NUM = get_length(sys.argv[1])
 
 table = [[0 for j in range(NUM)]for i in range(NUM)]
 cities = [0 for k in range(NUM)]
 
-city_table("cities.csv", cities, table, NUM)
+city_table(sys.argv[1], cities, table, NUM)
 
 
 print_table(cities, table)
 
+#print(cities)
 
-initial_num = int(factorial(NUM - 1))
+
+initial_num = 200 # int(factorial(NUM - 1) / 5)
+
 solutions = [[0 for k in range(NUM + 1)] for l in range(initial_num)]
 
 initial_pop(solutions, initial_num)
-
 
 solutions_len = [fitness(solutions[i]) for i in range(initial_num)]
 
 solution_sort(solutions, solutions_len)
 
-temp1 = [-1 for i in range(NUM)]
-temp2 = [-1 for j in range(NUM)]
+temp_array = [[0 for k in range(NUM + 1)] for l in range(initial_num)]
 
-crossover(solutions[5], solutions[25], temp1, temp2)
+for i in range(int(sys.argv[2])):
+    for n in range(ELITE):
+        temp_array[n] = solutions[n]
+            
+    for m in range(ELITE, initial_num, 2):
+        crossover(tournament(),tournament(), m, (m + 1))
+
+        if ((random.randrange(1,26) / 25) == 1):
+            mutation(temp_array[m])
+
+        if ((random.randrange(1,26) / 25) == 1):
+            mutation(temp_array[m + 1])
+
+    for solu in range(initial_num):
+        for node in range(NUM + 1):
+            solutions[solu][node] = temp_array[solu][node]
+
+
+    for cycle in range(initial_num):
+        solutions_len[cycle] = fitness(solutions[cycle])
+        solution_sort(solutions, solutions_len)    
+
+
+print(solutions[0])
+print(solutions_len[0])
+
+#for cycle in range(initial_num):
+        #print(solutions[cycle])
+

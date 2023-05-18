@@ -38,13 +38,4 @@ TO DO
     5%
 
     second and next population 144
-    5 EL. 139 tournament
-
-    25 cross
-                                 
-             27 x 20
-    
-    
-     32.  20 31
-
-
+    4 EL. 140 tournament
