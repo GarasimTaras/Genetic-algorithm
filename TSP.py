@@ -1,3 +1,4 @@
+#copyright
 import random
 import sys
 ELITE = 4
@@ -6,9 +7,9 @@ ELITE = 4
 def get_length(names):
     num = 0
     f = open(names, "r")
-    temp = f.readline()
-    temp = temp.replace(",", "")
-    num = len(temp) - 1
+    temp = f.readline().strip('\n')
+    temp = temp.split(',')
+    num = len(temp)
     f.close()
     return num
 
@@ -88,14 +89,19 @@ def solution_sort(cycles, len_array):
                 continue
 
 def mutation(cycle):
-    num1 = random.randrange(1, NUM)
-    num2 = random.randrange(1, NUM)
+    num1 = random.randrange(0, NUM + 1)
+    num2 = random.randrange(0, NUM + 1)
     while (num1 == num2):
         num2 = random.randrange(1, NUM)
     
     temp = cycle[num1]
     cycle[num1] = cycle[num2]
     cycle[num2] = temp
+
+    if ((num1 == 0) or (num2 == 0)):
+        cycle[NUM] = cycle[0]
+    elif ((num1 == NUM) or (num2 == NUM)):
+        cycle[0] = cycle[NUM]
     
 
 def crossover(solu1, solu2, new1, new2):
@@ -155,17 +161,36 @@ def node_validation(node, array, lower, upper):
     else:
         return False
 
-def tournament():
-    first = random.randrange(0, initial_num)
-    second = random.randrange(0, initial_num)
+def tournament(iter_num):
+    if (iter_num == 1):
+        cycle1 = random.randrange(0, initial_num)
+        cycle2 = random.randrange(0, initial_num)
 
-    parent1 = solutions_len[first]
-    parent2 = solutions_len[second]
+        parent1 = solutions_len[cycle1]
+        parent2 = solutions_len[cycle2]
 
-    if (parent1 < parent2):
-        return first
+        if (parent1 < parent2):
+            return cycle1, iter_num
+        else:
+            return cycle2, iter_num
     else:
-        return second
+        iter_num -= 1
+        cycle1 = tournament(iter_num)[0]
+        cycle2 = tournament(iter_num)[0]
+
+        parent1 = solutions_len[cycle1]
+        parent2 = solutions_len[cycle2]
+
+        if (parent1 < parent2):
+            return cycle1, iter_num
+        else:
+            return cycle2, iter_num    
+
+
+def print_solution(cycle,cities):
+    for node in range(NUM + 1):
+        print(f"{cities[cycle[node]]}", end=",")
+    print()
 
 #main program
 
@@ -179,13 +204,13 @@ cities = [0 for k in range(NUM)]
 
 city_table(sys.argv[1], cities, table, NUM)
 
-
 print_table(cities, table)
 
-#print(cities)
-
-
-initial_num = 200 # int(factorial(NUM - 1) / 5)
+initial_num = int(factorial(NUM - 1) / 5)
+if (int(factorial(NUM - 1) / 5) > 200):
+    initial_num = 200
+else:
+    pass
 
 solutions = [[0 for k in range(NUM + 1)] for l in range(initial_num)]
 
@@ -197,12 +222,14 @@ solution_sort(solutions, solutions_len)
 
 temp_array = [[0 for k in range(NUM + 1)] for l in range(initial_num)]
 
-for i in range(int(sys.argv[2])):
+
+
+for i in range(int(sys.argv[3])):
     for n in range(ELITE):
         temp_array[n] = solutions[n]
             
     for m in range(ELITE, initial_num, 2):
-        crossover(tournament(),tournament(), m, (m + 1))
+        crossover(tournament(int(sys.argv[2]))[0],tournament(int(sys.argv[2]))[0], m, (m + 1))
 
         if ((random.randrange(1,26) / 25) == 1):
             mutation(temp_array[m])
@@ -210,19 +237,20 @@ for i in range(int(sys.argv[2])):
         if ((random.randrange(1,26) / 25) == 1):
             mutation(temp_array[m + 1])
 
+ 
     for solu in range(initial_num):
         for node in range(NUM + 1):
             solutions[solu][node] = temp_array[solu][node]
-
+   
 
     for cycle in range(initial_num):
         solutions_len[cycle] = fitness(solutions[cycle])
-        solution_sort(solutions, solutions_len)    
+        solution_sort(solutions, solutions_len)  
+        
+    print(f"{i + 1}:", solutions_len[0])
 
+ 
 
-print(solutions[0])
+print()
+print_solution(solutions[0], cities)
 print(solutions_len[0])
-
-#for cycle in range(initial_num):
-        #print(solutions[cycle])
-
